@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanguard-EMS Coordination Dashboard</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>VANGUARD<span>EMS</span></h1>
+                <p>Spacetime Coordination Engine</p>
+            </div>
+            
+            <div class="status-panel">
+                <h3>SYSTEM STATUS</h3>
+                <div class="metric">
+                    <span class="label">State Sync</span>
+                    <span class="value" id="ws-status-badge">Connecting...</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Active Units</span>
+                    <span class="value">1 (AMB-01)</span>
+                </div>
+                <div class="metric">
+                    <span class="label">ArmorIQ Safety Layer</span>
+                    <span class="value success">ACTIVE</span>
+                </div>
+            </div>
+
+            <div class="event-feed">
+                <h3>LIVE EVENT LOG</h3>
+                <ul id="log-list">
+                    <!-- Logs will be injected here -->
+                </ul>
+            </div>
+        </aside>
+        
+        <main class="map-area">
+            <div id="map"></div>
+            
+            <div class="hud-overlay">
+                <div class="hud-card">
+                    <h4>Target Signal</h4>
+                    <div id="hud-signal">SCANNING...</div>
+                </div>
+                <div class="hud-card">
+                    <h4>Vultr Compute Node</h4>
+                    <div>DEL-01 Active</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
