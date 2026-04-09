@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vanguard-EMS — Real-Time Emergency Coordination</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #060a0f;
+    --surface: #0d1520;
+    --border: #1a2a3a;
+    --accent: #e63a2e;
+    --accent2: #ff7043;
+    --green: #00e676;
+    --blue: #1de9b6;
+    --text: #e8f0f8;
+    --muted: #6b8099;
+    --syne: 'Syne', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Crimson Pro', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--syne);
+    overflow-x: hidden;
+  }
+
+  /* ---- NOISE OVERLAY ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6, 10, 15, 0.85);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: #fff !important;
+    padding: 0.55rem 1.4rem;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .nav-cta:hover { background: var(--accent2); }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(230,58,46,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(230,58,46,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 60% 40%, black, transparent);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(230,58,46,0.12) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(29,233,182,0.07) 0%, transparent 70%);
+    bottom: -100px; left: 10%;
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-title {
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+  }
+
+  .hero-title .line2 {
+    display: block;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(232,240,248,0.3);
+  }
+
+  .hero-title .highlight {
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero-sub {
+    margin-top: 2.5rem;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.65;
+  }
+
+  .hero-actions {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--syne);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.9rem 2rem;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-2px); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--syne);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.9rem 2rem;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text); }
+
+  .hero-stats {
+    margin-top: 5rem;
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    padding-top: 2.5rem;
+  }
+
+  .stat-item {}
+  .stat-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-num span { color: var(--accent); }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+
+  /* ---- LIVE DEMO ---- */
+  .section { padding: 6rem 3rem; }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 700px;
+    margin-bottom: 1.5rem;
+  }
+  .section-body {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 580px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+  }
+
+  /* ---- DEMO WINDOW ---- */
+  .demo-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .demo-toolbar {
+    background: #0a1219;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .demo-dots { display: flex; gap: 6px; }
+  .demo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .demo-dot.r { background: #e63a2e; }
+  .demo-dot.y { background: #ffb300; }
+  .demo-dot.g { background: #00e676; }
+
+  .demo-url {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.3rem 0.8rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .demo-status {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .pulse-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .demo-body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 520px;
+  }
+
+  .demo-sidebar {
+    background: #080e16;
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar-header {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.8rem;
+  }
+
+  .ambulance-card {
+    background: rgba(230,58,46,0.06);
+    border: 1px solid rgba(230,58,46,0.2);
+    border-radius: 3px;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+    animation: cardPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes cardPulse {
+    0%, 100% { border-color: rgba(230,58,46,0.2); }
+    50% { border-color: rgba(230,58,46,0.5); }
+  }
+
+  .amb-id {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .amb-status {
+    font-size: 0.7rem;
+    color: var(--green);
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .amb-route {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-top: 0.6rem;
+    line-height: 1.6;
+  }
+
+  .amb-eta {
+    margin-top: 0.6rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .amb-eta span {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-left: 0.3rem;
+  }
+
+  .signal-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .signal-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    padding: 0.5rem 0.7rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  .signal-badge {
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .sig-green { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .sig-red { background: rgba(230,58,46,0.15); color: var(--accent); border: 1px solid rgba(230,58,46,0.3); }
+  .sig-queue { background: rgba(255,179,0,0.15); color: #ffb300; border: 1px solid rgba(255,179,0,0.3); }
+
+  /* MAP AREA */
+  .demo-map {
+    position: relative;
+    overflow: hidden;
+    background: #060c14;
+  }
+
+  .map-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(29,233,182,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29,233,182,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* SVG Map */
+  .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .road { stroke: rgba(255,255,255,0.08); stroke-width: 8; fill: none; }
+  .road-center { stroke: rgba(255,255,255,0.04); stroke-width: 1; stroke-dasharray: 6 6; fill: none; }
+  .green-wave { stroke: var(--green); stroke-width: 3; fill: none; stroke-dasharray: 8 4; opacity: 0.6; }
+
+  .node-ring {
+    fill: none;
+    stroke: rgba(29,233,182,0.3);
+    animation: ringPulse 2s ease-in-out infinite;
+  }
+  @keyframes ringPulse {
+    0%, 100% { r: 12; opacity: 0.6; }
+    50% { r: 18; opacity: 0; }
+  }
+
+  .ambulance-icon {
+    animation: moveAmb 8s linear infinite;
+  }
+  @keyframes moveAmb {
+    0% { transform: translate(140px, 360px); }
+    25% { transform: translate(240px, 280px); }
+    50% { transform: translate(380px, 200px); }
+    75% { transform: translate(480px, 160px); }
+    100% { transform: translate(140px, 360px); }
+  }
+
+  .route-path {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 10 4;
+    opacity: 0.8;
+    animation: dashMove 1s linear infinite;
+  }
+  @keyframes dashMove {
+    to { stroke-dashoffset: -14; }
+  }
+
+  .intersection-dot { fill: rgba(255,255,255,0.15); }
+  .intersection-active { fill: var(--green); filter: drop-shadow(0 0 6px var(--green)); }
+  .intersection-queued { fill: #ffb300; filter: drop-shadow(0 0 4px #ffb300); }
+
+  .map-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    fill: rgba(255,255,255,0.3);
+    letter-spacing: 0.1em;
+  }
+
+  /* LOG PANEL */
+  .log-panel {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 300px;
+    background: rgba(6,10,15,0.92);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    max-height: 180px;
+    overflow: hidden;
+  }
+
+  .log-header {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .log-entries {
+    padding: 0.5rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .log-entry {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    line-height: 1.4;
+    animation: logFade 0.4s ease;
+  }
+  @keyframes logFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+
+  .log-entry .ts { color: rgba(255,255,255,0.2); margin-right: 0.5rem; }
+  .log-entry .ok { color: var(--green); }
+  .log-entry .warn { color: #ffb300; }
+  .log-entry .err { color: var(--accent); }
+
+  /* ---- FEATURES ---- */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  .feature-card {
+    background: var(--bg);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .feature-card:hover { background: var(--surface); }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.3s;
+  }
+
+  .feature-card:hover::before { transform: scaleY(1); }
+
+  .feature-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .feature-name {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.8rem;
+    color: var(--text);
+  }
+
+  .feature-desc {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .feature-tag {
+    margin-top: 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  /* ---- ARCH ---- */
+  .arch-section { padding: 6rem 3rem; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  .arch-layer {
+    background: var(--bg);
+    padding: 2.5rem;
+    position: relative;
+  }
+
+  .layer-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  .layer-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .layer-subtitle {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .layer-desc {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .layer-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.5rem;
+  }
+
+  .tech-chip {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--blue);
+    background: rgba(29,233,182,0.07);
+    border: 1px solid rgba(29,233,182,0.2);
+    padding: 0.25rem 0.6rem;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ---- STACK ---- */
+  .stack-section { padding: 6rem 3rem; }
+
+  .stack-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 3rem;
+    font-size: 0.88rem;
+  }
+
+  .stack-table th {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stack-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+
+  .stack-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .stack-layer-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .stack-tech-name {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stack-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+  }
+
+  .badge-ai { background: rgba(230,58,46,0.12); color: var(--accent); border: 1px solid rgba(230,58,46,0.25); }
+  .badge-db { background: rgba(29,233,182,0.12); color: var(--blue); border: 1px solid rgba(29,233,182,0.25); }
+  .badge-infra { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+  .badge-core { background: rgba(255,179,0,0.12); color: #ffb300; border: 1px solid rgba(255,179,0,0.25); }
+
+  /* ---- QUICKSTART ---- */
+  .qs-section { padding: 6rem 3rem; background: var(--surface); border-top: 1px solid var(--border); }
+
+  .qs-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .qs-step {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 3rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.05);
+    line-height: 1;
+    position: absolute;
+    top: 1rem; right: 1.2rem;
+  }
+
+  .step-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+  }
+
+  .step-code {
+    background: #040810;
+    border: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--blue);
+    letter-spacing: 0.05em;
+    line-height: 1.7;
+    overflow-x: auto;
+    border-radius: 2px;
+    white-space: pre;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    padding: 3rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 1.5rem;
+  }
+
+  .footer-logo {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .footer-logo span { color: var(--accent); }
+
+  .footer-links { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: rgba(107,128,153,0.5);
+    letter-spacing: 0.08em;
+  }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-eyebrow { animation: fadeUp 0.6s ease both; }
+  .hero-title { animation: fadeUp 0.6s 0.1s ease both; }
+  .hero-sub { animation: fadeUp 0.6s 0.2s ease both; }
+  .hero-actions { animation: fadeUp 0.6s 0.3s ease both; }
+  .hero-stats { animation: fadeUp 0.6s 0.4s ease both; }
+
+  /* responsive */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero, .section, .arch-section, .stack-section, .qs-section, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .arch-grid { grid-template-columns: 1fr; }
+    .demo-body { grid-template-columns: 1fr; }
+    .demo-sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Vanguard<span>-EMS</span></a>
+  <ul class="nav-links">
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#quickstart">Quickstart</a></li>
+    <li><a href="https://github.com/Aadi7171/Vanguard-ems" target="_blank" class="nav-cta">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-eyebrow">Real-Time Emergency Coordination Engine</div>
+
+  <h1 class="hero-title">
+    Every second<br>
+    <span class="line2">is a distributed</span><br>
+    <span class="highlight">systems problem</span>
+  </h1>
+
+  <p class="hero-sub">
+    Vanguard-EMS transforms ambulance routing in chaotic Indian urban traffic into a high-concurrency coordination engine — combining AI vision, shared state, and dynamic signal control.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#demo" class="btn-primary">▶ View Live Demo</a>
+    <a href="https://github.com/Aadi7171/Vanguard-ems" target="_blank" class="btn-secondary">⭐ Star on GitHub</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">3<span>x</span></div>
+      <div class="stat-label">Faster Response Time</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Concurrent Ambulances</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span>~</span>50ms</div>
+      <div class="stat-label">Signal Propagation</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Hard Rule Violations Allowed</div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="section" id="demo">
+  <div class="section-label">// live_demo.py</div>
+  <h2 class="section-title">Watch the system coordinate in real time</h2>
+  <p class="section-body">
+    The simulator feeds live GPS positions to the backend, which calculates green-wave corridors and clears intersections ahead of the ambulance.
+  </p>
+
+  <div class="demo-container">
+    <div class="demo-toolbar">
+      <div class="demo-dots">
+        <div class="demo-dot r"></div>
+        <div class="demo-dot y"></div>
+        <div class="demo-dot g"></div>
+      </div>
+      <div class="demo-url">http://localhost:8000 — Vanguard Dashboard</div>
+      <div class="demo-status"><div class="pulse-dot"></div>LIVE</div>
+    </div>
+
+    <div class="demo-body">
+      <!-- SIDEBAR -->
+      <div class="demo-sidebar">
+        <div class="sidebar-header">Active Units</div>
+
+        <div class="ambulance-card">
+          <div class="amb-id">AMB-014</div>
+          <div class="amb-status"><div class="pulse-dot"></div> EN ROUTE</div>
+          <div class="amb-route">
+            📍 Hamidia Rd → MP Nagar<br>
+            🏥 Target: AIIMS Bhopal
+          </div>
+          <div class="amb-eta">4:22 <span>ETA (MIN)</span></div>
+        </div>
+
+        <div class="sidebar-header">Signal Status</div>
+        <div class="signal-row">
+          <div class="signal-item">
+            <span>Hamidia × DB Mall</span>
+            <span class="signal-badge sig-green">GREEN</span>
+          </div>
+          <div class="signal-item">
+            <span>MP Nagar × Zone II</span>
+            <span class="signal-badge sig-green">GREEN</span>
+          </div>
+          <div class="signal-item">
+            <span>Arera Colony Sq.</span>
+            <span class="signal-badge sig-queue">QUEUING</span>
+          </div>
+          <div class="signal-item">
+            <span>Bittan Market</span>
+            <span class="signal-badge sig-red">NORMAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div class="demo-map">
+        <div class="map-grid"></div>
+
+        <svg class="map-svg" viewBox="0 0 700 520" xmlns="http://www.w3.org/2000/svg">
+          <!-- Roads horizontal -->
+          <line class="road" x1="0" y1="180" x2="700" y2="180"/>
+          <line class="road" x1="0" y1="340" x2="700" y2="340"/>
+          <line class="road-center" x1="0" y1="180" x2="700" y2="180"/>
+          <line class="road-center" x1="0" y1="340" x2="700" y2="340"/>
+
+          <!-- Roads vertical -->
+          <line class="road" x1="140" y1="0" x2="140" y2="520"/>
+          <line class="road" x1="320" y1="0" x2="320" y2="520"/>
+          <line class="road" x1="500" y1="0" x2="500" y2="520"/>
+          <line class="road-center" x1="140" y1="0" x2="140" y2="520"/>
+          <line class="road-center" x1="320" y1="0" x2="320" y2="520"/>
+          <line class="road-center" x1="500" y1="0" x2="500" y2="520"/>
+
+          <!-- Diagonal road -->
+          <line class="road" x1="0" y1="420" x2="500" y2="100"/>
+          <line class="road-center" x1="0" y1="420" x2="500" y2="100"/>
+
+          <!-- Green wave route -->
+          <polyline class="green-wave" points="140,360 140,180 320,180 500,180 500,100"/>
+
+          <!-- Route path (ambulance corridor) -->
+          <polyline class="route-path" points="140,360 140,180 320,180 500,180 500,100"/>
+
+          <!-- Intersections -->
+          <circle class="intersection-dot" cx="140" cy="340" r="8"/>
+          <circle class="intersection-active" cx="140" cy="180" r="8"/>
+          <circle class="intersection-active" cx="320" cy="180" r="8"/>
+          <circle class="intersection-queued" cx="500" cy="180" r="8"/>
+          <circle class="intersection-dot" cx="500" cy="340" r="8"/>
+          <circle class="intersection-dot" cx="320" cy="340" r="8"/>
+
+          <!-- Ring pulses on active -->
+          <circle class="node-ring" cx="140" cy="180" r="12" stroke-width="1.5"/>
+          <circle class="node-ring" cx="320" cy="180" r="12" stroke-width="1.5" style="animation-delay:0.4s"/>
+
+          <!-- Map labels -->
+          <text class="map-label" x="148" y="174">Hamidia × DB Mall</text>
+          <text class="map-label" x="328" y="174">MP Nagar × Zone II</text>
+          <text class="map-label" x="508" y="174">Arera Colony</text>
+          <text class="map-label" x="148" y="354">Hamidia Rd</text>
+
+          <!-- Ambulance icon (animated) -->
+          <g class="ambulance-icon">
+            <rect x="-14" y="-8" width="28" height="16" rx="3" fill="#e63a2e"/>
+            <rect x="-6" y="-5" width="8" height="6" rx="1" fill="rgba(255,255,255,0.4)"/>
+            <text x="-3" y="4" font-family="monospace" font-size="9" fill="white" font-weight="bold">+</text>
+            <circle cx="-9" cy="8" r="3.5" fill="#1a2a3a"/>
+            <circle cx="9" cy="8" r="3.5" fill="#1a2a3a"/>
+            <circle cx="-9" cy="8" r="1.5" fill="#6b8099"/>
+            <circle cx="9" cy="8" r="1.5" fill="#6b8099"/>
+            <!-- siren flash -->
+            <circle cx="0" cy="-12" r="4" fill="rgba(0,230,118,0.8)" style="animation:pulse 0.8s ease-in-out infinite"/>
+          </g>
+
+          <!-- Hospital marker -->
+          <g transform="translate(500, 80)">
+            <rect x="-18" y="-18" width="36" height="36" rx="4" fill="rgba(29,233,182,0.15)" stroke="rgba(29,233,182,0.4)" stroke-width="1"/>
+            <text x="-7" y="7" font-family="monospace" font-size="16" fill="#1de9b6" font-weight="bold">🏥</text>
+          </g>
+          <text class="map-label" x="522" y="88" fill="rgba(29,233,182,0.6)">AIIMS Bhopal</text>
+        </svg>
+
+        <!-- Log panel -->
+        <div class="log-panel">
+          <div class="log-header">// system_log</div>
+          <div class="log-entries" id="logEntries">
+            <div class="log-entry"><span class="ts">09:14:22</span> <span class="ok">✓</span> AMB-014 position ingested</div>
+            <div class="log-entry"><span class="ts">09:14:22</span> <span class="ok">✓</span> ArmorIQ: route validated</div>
+            <div class="log-entry"><span class="ts">09:14:23</span> <span class="ok">✓</span> Green-wave: Hamidia × DB Mall</div>
+            <div class="log-entry"><span class="ts">09:14:23</span> <span class="ok">✓</span> Green-wave: MP Nagar × Zone II</div>
+            <div class="log-entry"><span class="ts">09:14:24</span> <span class="warn">⚠</span> Gemini: roadblock detected [C-17]</div>
+            <div class="log-entry"><span class="ts">09:14:24</span> <span class="ok">✓</span> Rerouting via Arera bypass...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">// features.list</div>
+  <h2 class="section-title">Everything needed to clear the path</h2>
+  <p class="section-body">
+    Each component was designed to solve a specific failure mode of conventional ambulance coordination in dense urban environments.
+  </p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📡</div>
+      <div class="feature-name">Real-Time GPS Ingestion</div>
+      <div class="feature-desc">Captures live ambulance trajectories as they happen, feeding continuous position updates into the coordination engine with sub-second latency.</div>
+      <div class="feature-tag">// simulator/ambulance_driver.py</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👁️</div>
+      <div class="feature-name">AI Roadblock Detection</div>
+      <div class="feature-desc">Environment snapshots are processed by Google Gemini to identify physical obstacles, congestion, and road anomalies that GPS alone cannot detect.</div>
+      <div class="feature-tag">// Google Gemini Vision API</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <div class="feature-name">Distributed Shared State</div>
+      <div class="feature-desc">A SpacetimeDB-inspired synchronization layer ensures every node has a consistent real-time world view, eliminating coordination conflicts between services.</div>
+      <div class="feature-tag">// backend/state_manager.py</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-name">ArmorIQ Rule Validation</div>
+      <div class="feature-desc">Every proposed route is validated against hard safety constraints. No path can be activated if it violates a hard rule — safety is non-negotiable.</div>
+      <div class="feature-tag">// backend/armoriq.py</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚦</div>
+      <div class="feature-name">Dynamic Green-Wave Signals</div>
+      <div class="feature-desc">Traffic signals along the ambulance corridor are pre-cleared in sequence, creating a smooth green corridor that minimizes stops and delay.</div>
+      <div class="feature-tag">// backend/signal_controller.py</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-name">Metrics & Observability</div>
+      <div class="feature-desc">All routing decisions, response times, and system events are logged to MongoDB Atlas, enabling post-incident analysis and continuous improvement.</div>
+      <div class="feature-tag">// MongoDB Atlas</div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="arch-section" id="architecture">
+  <div class="section-label">// system_architecture</div>
+  <h2 class="section-title">Three layers that patch reality</h2>
+  <p class="section-body">
+    The architecture maps directly to how emergency response actually fails — and fixes each failure mode.
+  </p>
+
+  <div class="arch-grid">
+    <div class="arch-layer">
+      <div class="layer-num">LAYER 01 /</div>
+      <div class="layer-name">Ingest</div>
+      <div class="layer-subtitle">The Reality</div>
+      <div class="layer-desc">Captures raw inputs from the physical world: GPS streams from ambulance units and environment snapshots from cameras. Gemini Vision turns images into structured obstacle data.</div>
+      <div class="layer-tech">
+        <span class="tech-chip">FastAPI WebSocket</span>
+        <span class="tech-chip">Gemini Vision</span>
+        <span class="tech-chip">GPS Simulator</span>
+      </div>
+    </div>
+    <div class="arch-layer" style="border-left: 1px solid var(--border);">
+      <div class="layer-num">LAYER 02 /</div>
+      <div class="layer-name">Process</div>
+      <div class="layer-subtitle">The Coordination</div>
+      <div class="layer-desc">Maintains globally consistent state across all nodes. Every proposed action is validated by ArmorIQ before execution — ensuring the system never enters an unsafe state.</div>
+      <div class="layer-tech">
+        <span class="tech-chip">SpacetimeDB-inspired State</span>
+        <span class="tech-chip">ArmorIQ Engine</span>
+        <span class="tech-chip">Path Planner</span>
+      </div>
+    </div>
+    <div class="arch-layer" style="border-left: 1px solid var(--border);">
+      <div class="layer-num">LAYER 03 /</div>
+      <div class="layer-name">Output</div>
+      <div class="layer-subtitle">The Patch</div>
+      <div class="layer-desc">Actuation layer that sends green-wave commands to signal controllers in sequence and logs all decisions to MongoDB for accountability and analytics.</div>
+      <div class="layer-tech">
+        <span class="tech-chip">Signal Controller API</span>
+        <span class="tech-chip">MongoDB Atlas</span>
+        <span class="tech-chip">Live Dashboard</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="stack-section" id="stack">
+  <div class="section-label">// tech_stack.yml</div>
+  <h2 class="section-title">Built on battle-tested components</h2>
+  <p class="section-body">Every technology choice was made to maximize throughput and minimize latency on constrained infrastructure.</p>
+
+  <table class="stack-table">
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Technology</th>
+        <th>Purpose</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="stack-layer-label">Backend</span></td>
+        <td><span class="stack-tech-name">Python 3.10 + FastAPI</span></td>
+        <td style="color:var(--muted);font-size:0.85rem;">Coordination engine, WebSocket server, REST API</td>
+        <td><span class="stack-badge badge-core">CORE</span></td>
+      </tr>
+      <tr>
+        <td><span class="stack-layer-label">Frontend</span></td>
+        <td><span class="stack-tech-name">HTML / CSS / JavaScript</span></td>
+        <td style="color:var(--muted);font-size:0.85rem;">Real-time monitoring dashboard</td>
+        <td><span class="stack-badge badge-core">CORE</span></td>
+      </tr>
+      <tr>
+        <td><span class="stack-layer-label">AI / Vision</span></td>
+        <td><span class="stack-tech-name">Google Gemini API</span></td>
+        <td style="color:var(--muted);font-size:0.85rem;">Roadblock detection from environment images</td>
+        <td><span class="stack-badge badge-ai">AI</span></td>
+      </tr>
+      <tr>
+        <td><span class="stack-layer-label">Database</span></td>
+        <td><span class="stack-tech-name">MongoDB Atlas</span></td>
+        <td style="color:var(--muted);font-size:0.85rem;">Performance metrics, routing decisions, event logs</td>
+        <td><span class="stack-badge badge-db">DATABASE</span></td>
+      </tr>
+      <tr>
+        <td><span class="stack-layer-label">Infra</span></td>
+        <td><span class="stack-tech-name">Docker + Docker Compose</span></td>
+        <td style="color:var(--muted);font-size:0.85rem;">Containerized service orchestration</td>
+        <td><span class="stack-badge badge-infra">INFRA</span></td>
+      </tr>
+      <tr>
+        <td><span class="stack-layer-label">Simulation</span></td>
+        <td><span class="stack-tech-name">Python Ambulance Driver</span></td>
+        <td style="color:var(--muted);font-size:0.85rem;">Generates realistic GPS trajectories for testing</td>
+        <td><span class="stack-badge badge-core">CORE</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- QUICKSTART -->
+<section class="qs-section" id="quickstart">
+  <div class="section-label">// getting_started</div>
+  <h2 class="section-title">Up and running in 4 steps</h2>
+  <p class="section-body">Docker handles all the dependencies. You only need a Gemini API key.</p>
+
+  <div class="qs-steps">
+    <div class="qs-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Clone the repo</div>
+      <div class="step-code">git clone https://github.com/\nAadi7171/Vanguard-ems.git
+cd Vanguard-ems</div>
+    </div>
+    <div class="qs-step">
+      <div class="step-num">02</div>
+      <div class="step-title">Set environment variables</div>
+      <div class="step-code"># Create .env in project root
+GEMINI_API_KEY=your_key_here
+MONGO_URI=mongodb://mongo:27017/</div>
+    </div>
+    <div class="qs-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Start all services</div>
+      <div class="step-code">docker-compose up --build
+
+# Or on Windows:
+run.bat</div>
+    </div>
+    <div class="qs-step">
+      <div class="step-num">04</div>
+      <div class="step-title">Open the dashboard</div>
+      <div class="step-code">http://localhost:8000
+
+# Backend  → :8000
+# MongoDB  → :27017
+# Simulator → runs headlessly</div>
+    </div>
+  </div>
+
+  <div style="margin-top:3rem;display:flex;gap:1rem;flex-wrap:wrap;">
+    <a href="https://github.com/Aadi7171/Vanguard-ems" target="_blank" class="btn-primary">View on GitHub ↗</a>
+    <a href="https://github.com/Aadi7171/Vanguard-ems/archive/refs/heads/main.zip" class="btn-secondary">⬇ Download ZIP</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Vanguard<span>-EMS</span></div>
+  <div class="footer-links">
+    <a href="https://github.com/Aadi7171/Vanguard-ems" target="_blank">GitHub</a>
+    <a href="https://github.com/Aadi7171/Vanguard-ems/issues" target="_blank">Issues</a>
+    <a href="https://github.com/Aadi7171/Vanguard-ems/blob/main/README.md" target="_blank">Docs</a>
+    <a href="https://github.com/Aadi7171" target="_blank">Author</a>
+  </div>
+  <div class="footer-copy">© 2026 Aadi7171. Built for emergency response.</div>
+</footer>
+
+<script>
+  // Animated log entries
+  const logs = [
+    { ts: '09:14:25', type: 'ok', msg: 'State sync: all nodes consistent' },
+    { ts: '09:14:26', type: 'ok', msg: 'Green-wave: Arera Colony queued' },
+    { ts: '09:14:26', type: 'warn', msg: 'Gemini: moderate traffic [NH-46]' },
+    { ts: '09:14:27', type: 'ok', msg: 'AMB-014 position updated' },
+    { ts: '09:14:28', type: 'ok', msg: 'ETA recalculated: 4m 22s' },
+    { ts: '09:14:29', type: 'ok', msg: 'Signal cleared: Bittan Market' },
+    { ts: '09:14:30', type: 'ok', msg: 'ArmorIQ: hard rules satisfied' },
+    { ts: '09:14:31', type: 'warn', msg: 'Pedestrian cluster detected [C-8]' },
+    { ts: '09:14:32', type: 'ok', msg: 'Route adjusted via Shivaji Nagar' },
+    { ts: '09:14:33', type: 'ok', msg: 'Metrics logged to Atlas' },
+  ];
+
+  let logIdx = 0;
+  const logContainer = document.getElementById('logEntries');
+
+  setInterval(() => {
+    if (!logContainer) return;
+    const entry = logs[logIdx % logs.length];
+    logIdx++;
+
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    const typeClass = entry.type;
+    const symbol = entry.type === 'ok' ? '✓' : entry.type === 'warn' ? '⚠' : '✗';
+    div.innerHTML = `<span class="ts">${entry.ts}</span> <span class="${typeClass}">${symbol}</span> ${entry.msg}`;
+    logContainer.appendChild(div);
+
+    // Keep only last 8 entries
+    while (logContainer.children.length > 8) {
+      logContainer.removeChild(logContainer.firstChild);
+    }
+
+    // Auto-scroll
+    logContainer.scrollTop = logContainer.scrollHeight;
+  }, 2000);
+</script>
+
+</body>
+</html>
