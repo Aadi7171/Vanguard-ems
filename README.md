@@ -12,6 +12,35 @@
 
 Vanguard-EMS is a real-time Emergency Management System designed to tackle the chaotic nature of Indian urban traffic. It coordinates ambulance routing and traffic signal management through a combination of AI-powered environment analysis, distributed state synchronization, and rule-validated path planning — all working together to reduce emergency response times.
 
+<div align="center">
+
+[![Live Demo](https://img.shields.io/badge/🌐_Website-Live_Demo-e63a2e?style=for-the-badge)](https://aadi7171.github.io/Vanguard-ems)
+[![GitHub Stars](https://img.shields.io/github/stars/Aadi7171/Vanguard-ems?style=for-the-badge&color=1de9b6)](https://github.com/Aadi7171/Vanguard-ems/stargazers)
+[![Python](https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/atlas)
+
+**[🌐 Live Demo & Website](https://aadi7171.github.io/Vanguard-ems)** · **[📋 Report Bug](https://github.com/Aadi7171/Vanguard-ems/issues)** · **[✨ Request Feature](https://github.com/Aadi7171/Vanguard-ems/issues)**
+
+</div>
+
+---
+
+## 🌐 Website & Live Demo
+
+The project website with an interactive live demo is available at:
+
+**👉 [https://aadi7171.github.io/Vanguard-ems](https://aadi7171.github.io/Vanguard-ems)**
+
+The website includes:
+- **Animated live demo** — simulated dashboard showing ambulance routing, green-wave signals, and real-time log output
+- **Feature overview** — breakdown of all system capabilities
+- **Architecture diagram** — the 3-layer system explained visually
+- **Tech stack table** — full list of technologies used
+- **Quickstart guide** — get running in 4 steps
+
+> To deploy the website yourself, place `index.html` in the `docs/` folder of your repo and enable GitHub Pages in the repository settings.
 ---
 
 ## ⚙️ System Architecture
